@@ -30,7 +30,9 @@ interface ConverterStore {
   setConversionStats: (stats: ConversionStats) => void;
   setSelectedFile: (path: string | null) => void;
   addCustomPattern: (pattern: ConversionPattern) => void;
+  updateCustomPattern: (oldPattern: ConversionPattern, newPattern: ConversionPattern) => void;
   removeCustomPattern: (pattern: ConversionPattern) => void;
+  importCustomPatterns: (patterns: ConversionPattern[], mode: 'merge' | 'replace') => void;
   resetCustomPatterns: () => void;
   clearResults: () => void;
   reset: () => void;
@@ -72,10 +74,20 @@ export const useConverterStore = create<ConverterStore>((set, get) => ({
     customPatterns: [...state.customPatterns, pattern]
   })),
   
+  updateCustomPattern: (oldPattern, newPattern) => set((state) => ({
+    customPatterns: state.customPatterns.map(p =>
+      p.from === oldPattern.from && p.to === oldPattern.to ? newPattern : p
+    )
+  })),
+  
   removeCustomPattern: (pattern) => set((state) => ({
     customPatterns: state.customPatterns.filter(p => 
       p.from !== pattern.from || p.to !== pattern.to
     )
+  })),
+  
+  importCustomPatterns: (patterns, mode) => set((state) => ({
+    customPatterns: mode === 'replace' ? patterns : [...state.customPatterns, ...patterns]
   })),
   
   resetCustomPatterns: () => set({ customPatterns: [] }),
